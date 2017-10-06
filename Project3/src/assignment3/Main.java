@@ -23,20 +23,32 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
 
-        Scanner kb;	// input Scanner for commands
-        PrintStream ps;	// output file, for student testing and grading only
+        Scanner kb = new Scanner(System.in);	// input Scanner for commands
+        //PrintStream ps;	// output file, for student testing and grading only
         // If arguments are specified, read/write from/to files instead of Std IO.
-        if (args.length != 0) {
+        /*if (args.length != 0) {
             kb = new Scanner(new File(args[0]));
             ps = new PrintStream(new File(args[1]));
             System.setOut(ps);			// redirect output to ps
         } else {
             kb = new Scanner(System.in);// default input from Stdin
             ps = System.out;			// default output to Stdout
+        }*/
+        while(true) {
+        ArrayList<String> input = parse(kb);
+
+        ArrayList<String> output = getWordLadderBFS(input.get(0),input.get(1));
+
+        printLadder(output);
         }
-        initialize();
+
+        
+        
+        
+        
 
         // TODO methods to read in words, output ladder
+    //kb.close();
     }
 
     public static void initialize() {
@@ -51,8 +63,20 @@ public class Main {
      * If command is /quit, return empty ArrayList.
      */
     public static ArrayList<String> parse(Scanner keyboard) {
-        // TO DO
-        return null;
+        ArrayList<String> result = new ArrayList<String>();
+        String input = keyboard.nextLine();
+        if(input.contentEquals("quit")) {
+        
+        }
+        else{
+        String[] arr = input.split("[^a-zA-Z]+");
+        result.add(arr[0]);
+        result.add(arr[1]);
+    }
+
+
+
+        return result;
     }
 
     public static ArrayList<String> getWordLadderDFS(String start, String end) {
@@ -68,15 +92,66 @@ public class Main {
 
     public static ArrayList<String> getWordLadderBFS(String start, String end) {
 
-        // TODO some code
+        ArrayList<String> result = new ArrayList<String>();
+        ArrayList<String> isVisited = new ArrayList<String>();
+        
+        Queue<word> list =  new LinkedList<word>();
         Set<String> dict = makeDictionary();
-        // TODO more code
+        dict.add(end);
+        word current_word_obj = new word(start.toLowerCase());
+        isVisited.add(current_word_obj.getValue().toLowerCase());
+        list.add(current_word_obj);
+        while(!list.isEmpty()){
+            current_word_obj = list.poll();
+            
+            if((current_word_obj.getValue()).contentEquals(end.toLowerCase())){ // compares and breaks the loop if result is found
+               break; 
+            }
+            else{
+            // generate new words
+            for(int i =0; i< (current_word_obj.getValue()).length();i++){
+            char [] temp_word = (current_word_obj.getValue()).toCharArray();
+            for(char t = 'a'; t <= 'z'; t++){
 
-        return null; // replace this line later with real return
+                temp_word[i] = t;
+                String new_word = new String(temp_word);
+                // check if the word created is already visited and is in dictionary
+                if((!(isVisited.contains(new_word.toLowerCase())))&&(dict.contains(new_word.toUpperCase()))){
+               // create new word object, add it to is visited list and set its parent     
+                	isVisited.add(new_word.toLowerCase());
+                    word new_word_obj = new word(new_word);	
+                    new_word_obj.setParent(current_word_obj);
+                    list.add(new_word_obj);                   
+                    }
+                }
+            }
+        }
+    }
+        if(!list.isEmpty()){
+            while(current_word_obj.getParent()!= null){
+                result.add(0,current_word_obj.getValue());
+                current_word_obj = current_word_obj.getParent();
+            }
+            result.add(0,current_word_obj.getValue());
+        }
+        else
+        {
+            result.add("no word ladder can be found between ");
+            result.add(start);
+            result.add(" and ");
+            result.add(end);
+            result.add(".");
+            
+        }
+        return result; // replace this line later with real return
     }
 
 
     public static void printLadder(ArrayList<String> ladder) {
+
+        for(int i=0; i< ladder.size();i++){
+            System.out.println(ladder.get(i));
+        }
 
     }
     // TODO
